@@ -39,3 +39,10 @@ Consultas rápidas por título, marca o categoría.
 Ordenar resultados por precio, relevancia o ranking.
 
 Escalar a millones de registros sin comprometer rendimiento.
+
+Integrantes
+* Aguilera Sebastian
+* Aguilera Rocío
+* Gonzalez Luciana
+* Perez Jazmín
+* Gualpa Agostina
