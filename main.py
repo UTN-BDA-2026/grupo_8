@@ -1,7 +1,12 @@
 from fastapi import FastAPI
+from app.db.database import engine
 
-app = FastAPI() 
+app = FastAPI()
 
 @app.get("/")
 def home():
-    return {"message": "Hello, World!"}
+
+    connection = engine.connect()
+    connection.close()
+
+    return {"message": "Conexión OK"}
