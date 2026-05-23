@@ -8,7 +8,8 @@ load_dotenv()
 DATABASE_URL = (
     f"postgresql://{os.getenv('POSTGRES_USER')}:"
     f"{os.getenv('POSTGRES_PASSWORD')}@"
-    f"localhost:5433/"
+    f"{os.getenv('POSTGRES_HOST', 'localhost')}:"
+    f"{os.getenv('POSTGRES_PORT', '5433')}/"
     f"{os.getenv('POSTGRES_DB')}"
 )
 
@@ -19,3 +20,9 @@ SessionLocal = sessionmaker(
     autoflush=False,
     bind=engine
 )
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db  
+    finally:
+        db.close()  
