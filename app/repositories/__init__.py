@@ -1,0 +1,1 @@
+from categoria_repository import categoria_repo
