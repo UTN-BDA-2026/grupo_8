@@ -1,15 +1,23 @@
-from dataclasses import dataclass
-from app import db
+from datetime import date
+from decimal import Decimal
+from typing import List
+from sqlalchemy import String, Text, Numeric, Date
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from app.db.base_class import Base
 
-@dataclass(init=False, repr=True, eq=True)
-class Producto(db.Model):
-    __tablename__ = 'productos'
+class Producto(Base):
+    __tablename__ = "productos"
 
-    id_producto = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    asin = db.Column(db.String(20), unique=True, nullable=False)
-    titulo = db.Column(db.String(255), nullable=True)
+    id_producto: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    asin: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, index=True)
+    titulo: Mapped[str] = mapped_column(Text, nullable=True) 
+    marca: Mapped[str] = mapped_column(String(100), nullable=True)
+    categoria_principal: Mapped[str] = mapped_column(String(100), nullable=True)
+    descripcion: Mapped[str] = mapped_column(Text, nullable=True)
+    precio: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=True) 
+    fecha_publicacion: Mapped[date] = mapped_column(Date, nullable=True)
 
-    # Relaciones bidireccionales
-    atributos = db.relationship('Atributo', back_populates='producto', cascade='all, delete-orphan')
-    rankings = db.relationship('Ranking', back_populates='producto', cascade='all, delete-orphan')
-    relaciones = db.relationship('Relacion', back_populates='producto', cascade='all, delete-orphan')
+    categorias: Mapped[List["Categoria"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
+    atributos: Mapped[List["Atributo"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
+    rankings: Mapped[List["Ranking"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
+    relaciones: Mapped[List["Relacion"]] = relationship(back_populates="producto", cascade="all, delete-orphan")

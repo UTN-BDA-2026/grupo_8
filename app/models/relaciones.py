@@ -1,14 +1,12 @@
-from dataclasses import dataclass
-from app import db
+from sqlalchemy import String, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from app.db.base_class import Base
 
-@dataclass(init=False, repr=True, eq=True)
-class Relacion(db.Model):
-    __tablename__ = 'relaciones'
+class Relacion(Base):
+    __tablename__ = "relaciones"
 
-    id_relacion = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id_producto = db.Column(db.Integer, db.ForeignKey('productos.id_producto'), nullable=False)
-    asin_relacionado = db.Column(db.String(20), nullable=False)
-    tipo_relacion = db.Column(db.String(20), nullable=False)
-
-    # Relación bidireccional
-    producto = db.relationship('Producto', back_populates='relaciones')
+    id_relacion: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id_producto: Mapped[int] = mapped_column(ForeignKey("productos.id_producto", ondelete="CASCADE"), nullable=False)
+    asin_relacionado: Mapped[str] = mapped_column(String(20), nullable=False)
+    tipo_relacion: Mapped[str] = mapped_column(String(20), nullable=False)
+    producto: Mapped["Producto"] = relationship(back_populates="relaciones")

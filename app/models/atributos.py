@@ -1,14 +1,14 @@
-from sqlalchemy import Column, Integer, String
-from app.db.base import Base
+from sqlalchemy import String, Text, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from app.db.base_class import Base
 
-@dataclass(init=False, repr=True, eq=True)
-class Atributo(db.Model):
+class Atributo(Base):
     __tablename__ = 'atributos'
 
-    id_atributo = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id_producto = db.Column(db.Integer, db.ForeignKey('productos.id_producto'), nullable=False)
-    clave = db.Column(db.String(50), nullable=False)
-    valor = db.Column(db.Text, nullable=False) 
+    id_atributo: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id_producto: Mapped[int] = mapped_column(ForeignKey("productos.id_producto", ondelete="CASCADE"), nullable=False)
+    clave: Mapped[str] = mapped_column(String(50), nullable=False)
+    valor: Mapped[str] = mapped_column(Text, nullable=False) 
 
-    # Relación bidireccional
-    producto = db.relationship('Producto', back_populates='atributos')
+    # Relación bidireccional moderna apuntando a la clase Producto
+    producto: Mapped["Producto"] = relationship(back_populates="atributos")

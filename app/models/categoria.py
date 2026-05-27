@@ -1,8 +1,11 @@
-from sqlalchemy import Column, Integer, String
-from app.db.base import Base
+from sqlalchemy import String, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from app.db.base_class import Base
 
 class Categoria(Base):
-    __tablename__ = 'categorias'
+    __tablename__ = "categorias"
 
-    id = Column(Integer, primary_key=True, index=True)
-    nombre = Column(String(100), unique=True, nullable=False)    
+    id_categoria: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id_producto: Mapped[int] = mapped_column(ForeignKey("productos.id_producto", ondelete="CASCADE"), nullable=False)
+    nombre: Mapped[str] = mapped_column(String(100), nullable=False)    
+    producto: Mapped["Producto"] = relationship(back_populates="categorias")
