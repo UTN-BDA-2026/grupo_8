@@ -4,10 +4,10 @@ from typing import List
 from app.models import Categoria
 
 class CategoriaRepository:
-    def get_by_name(self, db: Session, nombre_buscar: str) -> List[Categoria]:
+    def buscar_por_nombre(self, db: Session, nombre_buscar: str) -> List[Categoria]:
         # Usamos ilike de Postgres para que busque "electronica" o "Electronica" por igual
-        query = select(Categoria).where(Categoria.nombre.ilike(f"%{nombre_buscar}%"))
-        result = db.execute(query)
-        return result.scalars().all()
+        consulta = select(Categoria).where(Categoria.nombre.ilike(f"%{nombre_buscar}%"))
+        resultado = db.execute(consulta)
+        return resultado.scalars().all()
 
 categoria_repo = CategoriaRepository()
