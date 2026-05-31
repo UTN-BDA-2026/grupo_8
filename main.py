@@ -3,8 +3,6 @@ from app.db.session import get_db, engine
 from sqlalchemy.orm import Session
 from app.db.base_class import Base
 
-Base.metadata.create_all(bind=engine)
-
 app = FastAPI(title="Buscador de Productos con FastAPI")
 
 @app.get("/")
