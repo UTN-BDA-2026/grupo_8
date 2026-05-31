@@ -1,7 +1,7 @@
 from datetime import date
 from decimal import Decimal
 from typing import List
-from sqlalchemy import String, Text, Numeric, Date
+from sqlalchemy import String, Text, Numeric, Date, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base_class import Base
 
@@ -17,7 +17,10 @@ class Producto(Base):
     precio: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=True) 
     fecha_publicacion: Mapped[date] = mapped_column(Date, nullable=True)
 
-    categorias: Mapped[List["Categoria"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
+    id_categoria: Mapped[int] = mapped_column(ForeignKey("categorias.id_categoria"), nullable=False)
+    categoria: Mapped["Categoria"] = relationship(back_populates="productos")
+
+
     atributos: Mapped[List["Atributo"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
     rankings: Mapped[List["Ranking"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
     relaciones: Mapped[List["Relacion"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
