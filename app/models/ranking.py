@@ -1,4 +1,4 @@
-from sqlalchemy import String, ForeignKey
+from sqlalchemy import String, ForeignKey, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base_class import Base
 
@@ -10,6 +10,19 @@ class Ranking(Base):
     categoria: Mapped[str] = mapped_column(String(100), nullable=False)
     posicion: Mapped[int] = mapped_column(nullable=False)
 
+<<<<<<< HEAD
     
     producto: Mapped["Producto"] = relationship(back_populates="rankings")
 
+=======
+    producto: Mapped["Producto"] = relationship(back_populates="rankings")
+
+
+    __table_args__ = (
+        Index(
+            "idx_ranking_categoria_posicion",
+            "categoria",      # 1° Busca por el texto de la categoría
+            "posicion"        # 2° Ordena por la posición (agrega .desc() si el mayor número es el mejor)
+        ),
+    )
+>>>>>>> 2cea7c543afada7664555a0c2443436857e2263c
