@@ -4,6 +4,7 @@ from typing import List
 from sqlalchemy import String, Text, Numeric, Date, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base_class import Base
+from app.models.ranking import Ranking
 
 class Producto(Base):
     __tablename__ = "productos"
@@ -22,5 +23,6 @@ class Producto(Base):
 
 
     atributos: Mapped[List["Atributo"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
-    rankings: Mapped[List["Ranking"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
+    producto: Mapped["Producto"] = relationship(back_populates="ranking")
+    ranking: Mapped["Ranking"] = relationship(back_populates="producto", cascade="all, delete-orphan", uselist=False)
     relaciones: Mapped[List["Relacion"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
