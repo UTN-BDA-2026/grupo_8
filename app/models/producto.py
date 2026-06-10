@@ -18,7 +18,8 @@ class Producto(Base):
     precio: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=True) 
     fecha_publicacion: Mapped[date] = mapped_column(Date, nullable=True)
 
-    id_categoria: Mapped[int] = mapped_column(ForeignKey("categorias.id_categoria"), nullable=False)
+ 
+    id_categoria: Mapped[int] = mapped_column(ForeignKey("categorias.id_categoria"), nullable=False, index=True)
     categoria: Mapped["Categoria"] = relationship(back_populates="productos")
 
 
