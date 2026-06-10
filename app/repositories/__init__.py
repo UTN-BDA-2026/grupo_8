@@ -1,1 +1,2 @@
 from app.repositories.categoria_repository import categoria_repo
+from app.repositories.atributos_repository import atributo_repo
