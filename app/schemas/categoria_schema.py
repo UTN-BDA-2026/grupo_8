@@ -1,9 +1,13 @@
 from pydantic import BaseModel
 
-class CategoriaResponse(BaseModel):
-    id_categoria: int
-    id_producto: int
+class CategoriaBase(BaseModel):
     nombre: str
+
+class CategoriaCreate(CategoriaBase):
+    pass
+
+class CategoriaResponse(CategoriaBase):
+    id_categoria: int
 
     class Config:
         from_attributes = True
