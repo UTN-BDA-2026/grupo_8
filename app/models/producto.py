@@ -24,6 +24,5 @@ class Producto(Base):
 
 
     atributos: Mapped[List["Atributo"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
-    producto: Mapped["Producto"] = relationship(back_populates="ranking")
     ranking: Mapped["Ranking"] = relationship(back_populates="producto", cascade="all, delete-orphan", uselist=False)
     relaciones: Mapped[List["Relacion"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
