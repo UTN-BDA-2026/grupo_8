@@ -4,12 +4,14 @@ from sqlalchemy.orm import Session
 from app.db.base_class import Base
 from app.api.endpoints.categorias import router as categorias_router
 from app.api.endpoints.atributo import router as atributos_router
+from app.api.endpoints.producto import router as productos_router
 
 app = FastAPI(title="Buscador de Productos con FastAPI")
 
 app.include_router(categorias_router, prefix="/categorias", tags=["Categorías"])
-app.include_router(atributos_router, prefix="/atributos", tags=["Atributos"]
-                   )
+app.include_router(atributos_router, prefix="/atributos", tags=["Atributos"])
+app.include_router(productos_router, prefix="/productos", tags=["Productos"])
+
 @app.get("/")
 def home():
     return {"message": "API del buscador levantada correctamente"}
