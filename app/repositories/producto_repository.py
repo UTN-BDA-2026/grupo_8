@@ -10,4 +10,9 @@ class ProductoRepository:
         resultado = db.execute(consulta)
         return resultado.scalars().all()
 
+    def obtener_por_asin(self, db: Session, asin: str) -> Optional[Producto]:
+        """Busca un producto por su código ASIN de Amazon"""
+        consulta = select(Producto).where(Producto.asin == asin)
+        return db.execute(consulta).scalar_one_or_none()
+    
 producto_repo = ProductoRepository()
