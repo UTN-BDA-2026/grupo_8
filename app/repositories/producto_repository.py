@@ -10,6 +10,11 @@ class ProductoRepository:
         resultado = db.execute(consulta)
         return resultado.scalars().all()
 
+    def obtener_por_asin(self, db: Session, asin: str) -> Optional[Producto]:
+        """Busca un producto por su código ASIN de Amazon"""
+        consulta = select(Producto).where(Producto.asin == asin)
+        return db.execute(consulta).scalar_one_or_none()
+    
 
     def consulta_por_categoria(self, db: Session, nombre_categoria: str, page: int = 1, size: int = 10):
         consulta = (select(Producto).join(Ranking, Producto.id_producto == Ranking.id_producto)
