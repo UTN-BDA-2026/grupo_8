@@ -9,7 +9,6 @@ class Ranking(Base):
     id_producto: Mapped[int] = mapped_column(ForeignKey("productos.id_producto", ondelete="CASCADE"), nullable=False)
     categoria: Mapped[str] = mapped_column(String(100), nullable=False)
     posicion: Mapped[int] = mapped_column(nullable=False)
-
     producto: Mapped["Producto"] = relationship(back_populates="rankings")
 
 
@@ -20,3 +19,4 @@ class Ranking(Base):
             "posicion"        # 2° Ordena por la posición (agrega .desc() si el mayor número es el mejor)
         ),
     )
+
