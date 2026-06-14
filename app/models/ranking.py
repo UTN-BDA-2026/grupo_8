@@ -10,11 +10,7 @@ class Ranking(Base):
     categoria: Mapped[str] = mapped_column(String(100), nullable=False)
     posicion: Mapped[int] = mapped_column(nullable=False)
 
-<<<<<<< HEAD
     
-    producto: Mapped["Producto"] = relationship(back_populates="rankings")
-
-=======
     producto: Mapped["Producto"] = relationship(back_populates="rankings")
 
 
@@ -25,4 +21,4 @@ class Ranking(Base):
             "posicion"        # 2° Ordena por la posición (agrega .desc() si el mayor número es el mejor)
         ),
     )
->>>>>>> 2cea7c543afada7664555a0c2443436857e2263c
+
