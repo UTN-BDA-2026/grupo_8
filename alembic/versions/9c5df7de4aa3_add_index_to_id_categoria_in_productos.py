@@ -1,7 +1,7 @@
 """add_index_to_id_categoria_in_productos
 
 Revision ID: 9c5df7de4aa3
-Revises: 788dc39e93a0
+Revises: 
 Create Date: 2026-06-10 18:22:09.990325
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '9c5df7de4aa3'
-down_revision: Union[str, Sequence[str], None] = '788dc39e93a0'
+down_revision: Union[str, Sequence[str], None] = '1f8d522c4873'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
