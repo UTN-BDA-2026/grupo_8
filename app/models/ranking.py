@@ -9,7 +9,8 @@ class Ranking(Base):
     id_producto: Mapped[int] = mapped_column(ForeignKey("productos.id_producto", ondelete="CASCADE"), nullable=False)
     categoria: Mapped[str] = mapped_column(String(100), nullable=False)
     posicion: Mapped[int] = mapped_column(nullable=False)
-    producto: Mapped["Producto"] = relationship(back_populates="rankings")
+    producto: Mapped["Producto"] = relationship(back_populates="ranking")
+
 
 
     __table_args__ = (
