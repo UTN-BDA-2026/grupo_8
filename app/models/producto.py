@@ -13,7 +13,6 @@ class Producto(Base):
     asin: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, index=True)
     titulo: Mapped[str] = mapped_column(Text, nullable=True) 
     marca: Mapped[str] = mapped_column(String(100), nullable=True)
-    categoria_principal: Mapped[str] = mapped_column(String(100), nullable=True)
     descripcion: Mapped[str] = mapped_column(Text, nullable=True)
     precio: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=True) 
     fecha_publicacion: Mapped[date] = mapped_column(Date, nullable=True)
