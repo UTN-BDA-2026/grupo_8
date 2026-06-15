@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -10,30 +10,26 @@ router = APIRouter()
 
 
 @router.get("/buscar", response_model=List[ProductoResponse])
-def buscar_productos_por_titulo(
-    titulo: str,
+def buscar_productos_avanzado(
+    titulo: str = Query(..., description="Texto a buscar en la barra única (soporta errores, palabras sueltas y coincidencia exacta)"),
+    limit: int = Query(20, ge=1, le=100, description="Cantidad máxima de resultados por página"),
     db: Session = Depends(get_db)
 ):
-    """
-    Busca productos por coincidencia parcial en el título.
-    """
-    return producto_repo.buscar_por_titulo(db, titulo_buscar=titulo)
-
-@router.get("/buscar-palabras", response_model=List[ProductoResponse])
-def buscar_productos_por_palabras(texto: str, db: Session = Depends(get_db)):
-    """
-    Busca productos que contengan todas las palabras indicadas en el título.
-    Ejemplo: "iphone 15"
-    """
-    productos = producto_repo.buscar_por_palabras(db, texto)
-
+    if not titulo.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Debe ingresar un término de búsqueda válido."
+        )
+        
+    productos = producto_repo.busqueda_unificada(db, texto=titulo, limit=limit)
+    
     if not productos:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No se encontraron productos para '{texto}'"
+            detail=f"No se encontraron productos para '{titulo}'"
         )
-
     return productos
+
 
 @router.get("/{asin}", response_model=ProductoResponse)
 def obtener_producto_por_asin(asin: str, db: Session = Depends(get_db)):
