@@ -19,7 +19,21 @@ def buscar_productos_por_titulo(
     """
     return producto_repo.buscar_por_titulo(db, titulo_buscar=titulo)
 
+@router.get("/buscar-palabras", response_model=List[ProductoResponse])
+def buscar_productos_por_palabras(texto: str, db: Session = Depends(get_db)):
+    """
+    Busca productos que contengan todas las palabras indicadas en el título.
+    Ejemplo: "iphone 15"
+    """
+    productos = producto_repo.buscar_por_palabras(db, texto)
 
+    if not productos:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No se encontraron productos para '{texto}'"
+        )
+
+    return productos
 
 @router.get("/{asin}", response_model=ProductoResponse)
 def obtener_producto_por_asin(asin: str, db: Session = Depends(get_db)):
@@ -35,3 +49,4 @@ def obtener_producto_por_asin(asin: str, db: Session = Depends(get_db)):
         )
 
     return producto
+

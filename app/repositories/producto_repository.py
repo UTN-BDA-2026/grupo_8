@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from typing import List, Optional
 from app.models import Producto
 from typing import List
@@ -27,5 +27,19 @@ class ProductoRepository:
 
         resultado = db.execute(consulta)
         return resultado.scalars().all()
+
+
+    def buscar_por_palabras(self, db: Session, texto: str):
+        palabras = texto.split()
+
+        consulta = select(Producto).where(
+            and_(
+                *[
+                    Producto.titulo.ilike(f"%{palabra}%")
+                    for palabra in palabras
+                ]
+            )
+        )
+        return db.execute(consulta).scalars().all()
 
 producto_repo = ProductoRepository()
