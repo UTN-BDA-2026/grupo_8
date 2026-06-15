@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select, and_
 from typing import List, Optional
+from app import db
 from app.models import Producto
 from typing import List
 from app.models import Producto, Ranking
@@ -41,5 +42,22 @@ class ProductoRepository:
             )
         )
         return db.execute(consulta).scalars().all()
+    
+
+    def buscar_por_descripcion(self, db: Session, texto: str):
+        palabras = texto.split()
+
+        consulta = select(Producto).where(
+            and_(
+                *[
+                    Producto.descripcion.ilike(f"%{palabra}%")
+                    for palabra in palabras
+                ]
+            )
+        )
+
+        resultado = db.execute(consulta)
+
+        return resultado.scalars().all()
 
 producto_repo = ProductoRepository()
