@@ -9,3 +9,4 @@ class Categoria(Base):
     nombre: Mapped[str] = mapped_column(String(100), nullable=False)    
 
     productos: Mapped[List["Producto"]] = relationship(back_populates="categoria")
+    rankings: Mapped[List["Ranking"]] = relationship(back_populates="categoria", cascade="all, delete-orphan")

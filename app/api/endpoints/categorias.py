@@ -33,14 +33,14 @@ def buscar_categoria_por_nombre(
     response_model=list[ProductoResponse]
 )
 def buscar_productos_por_categoria(
-    categoria: str,
+    categoria: int,
     page: int = 1,
     size: int = 10,
     db: Session = Depends(get_db)
 ):
     productos = producto_repo.consulta_por_categoria(
         db=db,
-        nombre_categoria=categoria,
+        id_categoria=int(categoria),
         page=page,
         size=size
     )
