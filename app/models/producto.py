@@ -5,6 +5,7 @@ from sqlalchemy import String, Text, Numeric, Date, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base_class import Base
 from app.models.ranking import Ranking
+from sqlalchemy.dialects.postgresql import TSVECTOR
 
 class Producto(Base):
     __tablename__ = "productos"
@@ -16,6 +17,7 @@ class Producto(Base):
     descripcion: Mapped[str] = mapped_column(Text, nullable=True)
     precio: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=True) 
     fecha_publicacion: Mapped[date] = mapped_column(Date, nullable=True)
+    search_vector: Mapped[any] = mapped_column(TSVECTOR, nullable=True)
     id_categoria: Mapped[int] = mapped_column(ForeignKey("categorias.id_categoria"), nullable=False, index=True)
 
     
