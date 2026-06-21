@@ -40,9 +40,49 @@ Ordenar resultados por precio, relevancia o ranking.
 
 Escalar a millones de registros sin comprometer rendimiento.
 
+### Levantar la aplicación con Docker Compose
+
+1. Requisitos previos
+
+-Tener instalados Docker
+
+-Contar con una base de datos PostgreSQL creada previamente.
+
+-Configurar un archivo .env en la raíz del proyecto con las credenciales de conexión a la base de datos.
+
+2. Migraciones con Alembic
+
+Antes de usar la API, es necesario aplicar las migraciones para que la base de datos tenga las tablas e índices correctos.
+
+# Crear una nueva migración (si cambiaste modelos)
+
+alembic revision --autogenerate -m "mensaje de la migración"
+
+# Aplicar todas las migraciones pendientes
+
+alembic upgrade head
+
+3. Ejecutar en la carpeta docker del proyecto:
+
+docker compose up --build
+
+Esto construye la imagen y levanta el servicio backend.
+
+La API quedará disponible en: http://localhost:8000
+
+4. Verificación
+
+Podés comprobar que la API está corriendo y conectada a la base accediendo a la documentación interactiva:http://localhost:8000/docs
+
+📌 Notas importantes
+El docker-compose.yml está pensado para levantar la API. La base de datos debe estar corriendo aparte (local, contenedor independiente o nube).
+
+Las migraciones con Alembic no se aplican automáticamente: cada vez que cambies los modelos, generá una nueva migración y aplicala.
+
 Integrantes
-* Aguilera Sebastian
-* Aguilera Rocío
-* Gonzalez Luciana
-* Perez Jazmín
-* Gualpa Agostina
+
+- Aguilera Sebastian
+- Aguilera Rocío
+- Gonzalez Luciana
+- Perez Jazmín
+- Gualpa Agostina
