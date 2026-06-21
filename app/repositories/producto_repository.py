@@ -2,6 +2,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, or_, text, func
 from typing import List, Optional
 from app.models import Producto, Ranking
+from sqlalchemy import case
+
+import logging
+import time
+
+logger = logging.getLogger(__name__)
+
+
 
 class ProductoRepository:
 
@@ -30,42 +38,88 @@ class ProductoRepository:
         resultado = db.execute(consulta)
         return resultado.scalars().all()
 
-    def busqueda_unificada(self, db: Session, texto: str, limit: int = 20) -> List[Producto]:
-        """
-        El cerebro del buscador: procesa el texto de la barra única.
-        Busca por coincidencia exacta, palabras sueltas (FTS) y errores ortográficos.
-        Alinea todo según la popularidad del Ranking de Amazon.
-        """
+    def busqueda_unificada(self, db: Session, texto: str, limit: int = 20):
+        inicio_total = time.perf_counter()
         texto_limpio = texto.strip()
         if not texto_limpio:
             return []
 
-        query_fts = " & ".join(texto_limpio.split())
+        def map_result(rows):
+            return [
+                {
+                    "id_producto": r.id_producto,
+                    "asin": r.asin,
+                    "titulo": r.titulo,
+                    "marca": r.marca,
+                    "descripcion": r.descripcion,
+                    "precio": float(r.precio) if r.precio else None,
+                    "fecha_publicacion": r.fecha_publicacion,
+                    "categoria_principal": None,
+                    "posicion": None,
+                }
+                for r in rows
+            ]
 
-        condiciones = or_(
-            Producto.titulo.ilike(texto_limpio),
-            Producto.search_vector.op('@@')(func.to_tsquery('spanish', query_fts)),
-            Producto.titulo.op("%")(texto_limpio)
-        )
+        # 1. Exact match
+        inicio = time.perf_counter()
+        exactos = db.execute(
+            select(
+                Producto.id_producto,
+                Producto.asin,
+                Producto.titulo,
+                Producto.marca,
+                Producto.descripcion,
+                Producto.precio,
+                Producto.fecha_publicacion
+            )
+            .where(func.lower(Producto.titulo) == texto_limpio.lower())
+            .limit(limit)
+        ).all()
+        logger.info(f"Exact match ejecutado en {time.perf_counter() - inicio:.4f} segundos")
+        if exactos:
+            logger.info(f"Tiempo total busqueda_unificada: {time.perf_counter() - inicio_total:.4f} segundos")
+            return map_result(exactos)
 
-        consulta = (
-            select(Producto)
-            .outerjoin(Ranking, Producto.id_producto == Ranking.id_producto)
-            .where(condiciones)
-        )
+        # 2. Full-text search
+        inicio = time.perf_counter()
+        query_fts = func.plainto_tsquery('english', texto_limpio)
+        fts = db.execute(
+            select(
+                Producto.id_producto,
+                Producto.asin,
+                Producto.titulo,
+                Producto.marca,
+                Producto.descripcion,
+                Producto.precio,
+                Producto.fecha_publicacion
+            )
+            .where(Producto.search_vector.op('@@')(query_fts))
+            .order_by(func.ts_rank(Producto.search_vector, query_fts).desc())
+            .limit(limit)
+        ).all()
+        logger.info(f"FTS ejecutado en {time.perf_counter() - inicio:.4f} segundos")
+        if fts:
+            logger.info(f"Tiempo total busqueda_unificada: {time.perf_counter() - inicio_total:.4f} segundos")
+            return map_result(fts)
 
-        orden_exacto = text(f"CASE WHEN LOWER(productos.titulo) = LOWER('{texto_limpio}') THEN 1 ELSE 0 END DESC")
-        orden_fts = func.ts_rank(Producto.search_vector, func.to_tsquery('spanish', query_fts)).desc()
-        orden_trigramas = text(f"similarity(productos.titulo, '{texto_limpio}') DESC")
-        orden_ranking = text("COALESCE(ranking.posicion, 999999) ASC")
-        
-
-        consulta = consulta.order_by(
-            orden_exacto,
-            orden_fts,
-            orden_trigramas,
-            orden_ranking
-        ).limit(limit)
-
-
+        # 3. Trigram similarity
+        inicio = time.perf_counter()
+        trigram = db.execute(
+            select(
+                Producto.id_producto,
+                Producto.asin,
+                Producto.titulo,
+                Producto.marca,
+                Producto.descripcion,
+                Producto.precio,
+                Producto.fecha_publicacion
+            )
+            .where(Producto.titulo.op("%")(texto_limpio))
+            .order_by(func.similarity(Producto.titulo, texto_limpio).desc())
+            .limit(limit)
+        ).all()
+        logger.info(f"Trigram ejecutado en {time.perf_counter() - inicio:.4f} segundos")
+        logger.info(f"Tiempo total busqueda_unificada: {time.perf_counter() - inicio_total:.4f} segundos")
+        return map_result(trigram)
+    
 producto_repo = ProductoRepository()

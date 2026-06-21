@@ -47,5 +47,6 @@ USER buscador
 
 EXPOSE 8000
 
-# Usar Gunicorn con Uvicorn workers (más robusto en producción)
 CMD ["/opt/venv/bin/python", "-m", "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000", "main:app", "--workers", "4", "--log-level", "info"]
+
+

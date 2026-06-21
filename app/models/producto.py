@@ -1,11 +1,12 @@
 from datetime import date
 from decimal import Decimal
 from typing import List
-from sqlalchemy import String, Text, Numeric, Date, ForeignKey
+from sqlalchemy import String, Text, Numeric, Date, ForeignKey, Index, func, text 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base_class import Base
 from app.models.ranking import Ranking
 from sqlalchemy.dialects.postgresql import TSVECTOR
+from sqlalchemy import Index
 
 class Producto(Base):
     __tablename__ = "productos"
@@ -25,3 +26,12 @@ class Producto(Base):
     atributos: Mapped[List["Atributo"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
     ranking: Mapped["Ranking"] = relationship(back_populates="producto", cascade="all, delete-orphan", uselist=False)
     relaciones: Mapped[List["Relacion"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        # Este índice guarda los títulos ya en minúsculas
+        Index("ix_productos_titulo_lower", func.lower(text("titulo"))),
+        # índice GIN para full-text search
+        Index("ix_productos_search_vector", "search_vector", postgresql_using="gin"),
+        # índice GIN para trigram similarity
+        Index("ix_productos_titulo_trgm", "titulo", postgresql_using="gin", postgresql_ops={"titulo": "gin_trgm_ops"}),
+    )
