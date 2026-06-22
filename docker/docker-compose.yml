@@ -7,9 +7,11 @@ services:
       dockerfile: Dockerfile
     image: grupo8-backend:latest
     env_file:
-      - .env
+      - ../.env
     ports:
       - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - mired
 
