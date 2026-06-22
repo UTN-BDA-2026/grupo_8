@@ -5,6 +5,7 @@ from app.db.base_class import Base
 from app.api.endpoints.categorias import router as categorias_router
 from app.api.endpoints.atributo import router as atributos_router
 from app.api.endpoints.producto import router as productos_router
+from app.db.redis import get_redis
 import logging
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -41,3 +42,16 @@ def home():
 @app.get("/test-db")
 def probar_conexion(db: Session = Depends(get_db)):
     return {"status": "Conectado a la base de datos exitosamente", "database": str(db)}
+
+@app.get("/test-redis", tags=["default"])
+
+def test_redis(redis = Depends(get_redis)):
+    if redis is None:
+        return {"status": "error", "message": "Redis no está disponible en este entorno."}
+    try:
+        redis.set("grupo_8_test", "¡Conexión exitosa a Redis de forma correcta! ")
+        value = redis.get("grupo_8_test")
+        return {"redis_status": "OK", "valor_recuperado": value}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    
