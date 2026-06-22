@@ -13,6 +13,17 @@ services:
     networks:
       - mired
 
+  frontend:
+    build:
+      context: ../frontend # 👈 Sale de 'docker/' y entra directo a 'frontend/'
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80" # Tu web se abrirá en http://localhost:8080
+    depends_on:
+      - backend
+    networks:
+      - mired
+
 networks:
   mired:
     external: true
