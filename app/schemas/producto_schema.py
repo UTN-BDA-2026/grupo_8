@@ -11,6 +11,7 @@ class ProductoResponse(BaseModel):
     precio: float | None = None
     fecha_publicacion: date | None = None
     posicion: int | None = None
+    imagenes: list[str] | None = None
 
     class Config:
         from_attributes = True

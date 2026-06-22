@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select, or_, text, func
 from typing import List, Optional
 from app.models import Producto, Ranking
@@ -19,24 +19,34 @@ class ProductoRepository:
         return db.execute(consulta).scalar_one_or_none()
 
     def consulta_por_categoria(self, db: Session, id_categoria: int, page: int = 1, size: int = 10):
-        return (
-            db.query(
-                Producto.id_producto,
-                Producto.asin,
-                Producto.titulo,
-                Producto.marca,
-                Producto.descripcion,
-                Producto.precio,
-                Producto.fecha_publicacion,
-                Ranking.posicion.label("posicion")   # 👈 incluir ranking
-            )
+        productos = (
+            db.query(Producto)
+            .options(joinedload(Producto.imagenes))  # 🔴 eager load imágenes
             .join(Ranking, Producto.id_producto == Ranking.id_producto)
             .filter(Ranking.id_categoria == id_categoria)
             .order_by(Ranking.posicion.asc())
             .offset((page - 1) * size)
-            .limit(size))
-        resultado = db.execute(consulta)
-        return resultado.scalars().all()
+            .limit(size)
+            .all()
+        )
+
+        # Mapear resultados a dict con imágenes
+        resultado = [
+            {
+                "id_producto": p.id_producto,
+                "asin": p.asin,
+                "titulo": p.titulo,
+                "marca": p.marca,
+                "descripcion": p.descripcion,
+                "precio": float(p.precio) if p.precio else None,
+                "fecha_publicacion": p.fecha_publicacion,
+                "posicion": p.ranking.posicion if p.ranking else None,
+                "imagenes": [img.url for img in p.imagenes]  # 🔴 ya están cargadas
+            }
+            for p in productos
+        ]
+
+        return resultado
 
     def busqueda_unificada(self, db: Session, texto: str, limit: int = 20):
         inicio_total = time.perf_counter()
@@ -56,25 +66,20 @@ class ProductoRepository:
                     "fecha_publicacion": r.fecha_publicacion,
                     "categoria_principal": None,
                     "posicion": None,
+                    "imagenes": [img.url for img in r.imagenes]  
                 }
                 for r in rows
             ]
 
         # 1. Exact match
         inicio = time.perf_counter()
-        exactos = db.execute(
-            select(
-                Producto.id_producto,
-                Producto.asin,
-                Producto.titulo,
-                Producto.marca,
-                Producto.descripcion,
-                Producto.precio,
-                Producto.fecha_publicacion
-            )
-            .where(func.lower(Producto.titulo) == texto_limpio.lower())
+        exactos = (
+            db.query(Producto)
+            .options(joinedload(Producto.imagenes))  
+            .filter(func.lower(Producto.titulo) == texto_limpio.lower())
             .limit(limit)
-        ).all()
+            .all()
+        )
         logger.info(f"Exact match ejecutado en {time.perf_counter() - inicio:.4f} segundos")
         if exactos:
             logger.info(f"Tiempo total busqueda_unificada: {time.perf_counter() - inicio_total:.4f} segundos")
@@ -82,21 +87,15 @@ class ProductoRepository:
 
         # 2. Full-text search
         inicio = time.perf_counter()
-        query_fts = func.plainto_tsquery('english', texto_limpio)
-        fts = db.execute(
-            select(
-                Producto.id_producto,
-                Producto.asin,
-                Producto.titulo,
-                Producto.marca,
-                Producto.descripcion,
-                Producto.precio,
-                Producto.fecha_publicacion
-            )
-            .where(Producto.search_vector.op('@@')(query_fts))
+        query_fts = func.plainto_tsquery("english", texto_limpio)
+        fts = (
+            db.query(Producto)
+            .options(joinedload(Producto.imagenes))  # 🔴 eager load
+            .filter(Producto.search_vector.op("@@")(query_fts))
             .order_by(func.ts_rank(Producto.search_vector, query_fts).desc())
             .limit(limit)
-        ).all()
+            .all()
+        )
         logger.info(f"FTS ejecutado en {time.perf_counter() - inicio:.4f} segundos")
         if fts:
             logger.info(f"Tiempo total busqueda_unificada: {time.perf_counter() - inicio_total:.4f} segundos")
@@ -104,20 +103,14 @@ class ProductoRepository:
 
         # 3. Trigram similarity
         inicio = time.perf_counter()
-        trigram = db.execute(
-            select(
-                Producto.id_producto,
-                Producto.asin,
-                Producto.titulo,
-                Producto.marca,
-                Producto.descripcion,
-                Producto.precio,
-                Producto.fecha_publicacion
-            )
-            .where(Producto.titulo.op("%")(texto_limpio))
+        trigram = (
+            db.query(Producto)
+            .options(joinedload(Producto.imagenes))  # 🔴 eager load
+            .filter(Producto.titulo.op("%")(texto_limpio))
             .order_by(func.similarity(Producto.titulo, texto_limpio).desc())
             .limit(limit)
-        ).all()
+            .all()
+        )
         logger.info(f"Trigram ejecutado en {time.perf_counter() - inicio:.4f} segundos")
         logger.info(f"Tiempo total busqueda_unificada: {time.perf_counter() - inicio_total:.4f} segundos")
         return map_result(trigram)

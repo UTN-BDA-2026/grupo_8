@@ -26,6 +26,7 @@ class Producto(Base):
     atributos: Mapped[List["Atributo"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
     ranking: Mapped["Ranking"] = relationship(back_populates="producto", cascade="all, delete-orphan", uselist=False)
     relaciones: Mapped[List["Relacion"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
+    imagenes: Mapped[List["Imagen"]] = relationship(back_populates="producto", cascade="all, delete-orphan")
 
     __table_args__ = (
         # Este índice guarda los títulos ya en minúsculas
