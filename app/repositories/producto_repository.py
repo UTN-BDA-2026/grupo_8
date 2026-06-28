@@ -1,9 +1,11 @@
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import select, or_, text, func
 from typing import List, Optional
 from app.models import Producto, Ranking
 from sqlalchemy import case
 from app.db.redis import get_redis
+import redis
+from app.db.redis import pool
 
 import logging
 import time
@@ -20,7 +22,10 @@ class ProductoRepository:
     def consulta_por_categoria(self, db: Session, id_categoria: int, page: int = 1, size: int = 10):
         productos = (
             db.query(Producto)
-            .options(joinedload(Producto.imagenes))  # 🔴 eager load imágenes
+            .options(
+                joinedload(Producto.ranking),  
+                selectinload(Producto.imagenes) 
+            )
             .join(Ranking, Producto.id_producto == Ranking.id_producto)
             .filter(Ranking.id_categoria == id_categoria)
             .order_by(Ranking.posicion.asc())
@@ -52,9 +57,6 @@ class ProductoRepository:
         texto_limpio = texto.strip()
         if not texto_limpio:
             return []
-        
-        import redis
-        from app.db.redis import pool
         
         try:
             redis_client = redis.Redis(connection_pool=pool)
