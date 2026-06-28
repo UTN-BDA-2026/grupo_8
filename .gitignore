@@ -218,3 +218,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Se agrega la carpeta de backups al .gitignore para evitar subir archivos de respaldo al repositorio
+backups/
